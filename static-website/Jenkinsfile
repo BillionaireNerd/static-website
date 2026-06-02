@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+
+    environment {
+        S3_BUCKET  = 'my-static-website-bucket'   // ← change to your bucket name
+        AWS_REGION = 'eu-central-1'                // ← change to your bucket region
+    }
+
+    stages {
+
+        // ─────────────────────────────────────────────────────────────────
+        // STAGE 1: Fetch local files (no GitHub — pipeline runs on the
+        //          Jenkins workspace from a manually triggered build or
+        //          from files already present on the agent).
+        //
+        //          To use a Git repo later, replace this stage with:
+        //          git url: 'https://github.com/YOU/REPO.git', branch: 'main'
+        // ─────────────────────────────────────────────────────────────────
+        stage('Prepare Workspace') {
+            steps {
+                echo 'Using files already present in the Jenkins workspace.'
+                sh 'ls -la'
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // STAGE 2: SonarQube static code analysis  (your existing stage)
+        // ─────────────────────────────────────────────────────────────────
+        stage('Code Analysis') {
+            environment {
+                scannerHome = tool 'SonarScanner'
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=static-website \
+                        -Dsonar.projectName='Static Website' \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=.
+                    """
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // STAGE 3: Wait for Quality Gate result from SonarQube
+        //          Pipeline aborts here if quality gate fails — nothing
+        //          broken gets deployed.
+        // ─────────────────────────────────────────────────────────────────
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // STAGE 4: Deploy to S3
+        //          Uses AWS credentials stored in Jenkins as Secret Text.
+        //          IDs must match exactly what you saved:
+        //            - AWS_ACCESS_KEY_ID
+        //            - AWS_SECRET_ACCESS_KEY
+        // ─────────────────────────────────────────────────────────────────
+        stage('Deploy to S3') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID',     variable: 'AWS_KEY_ID'),
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET')
+                ]) {
+                    sh """
+                        # Configure AWS CLI with stored credentials
+                        aws configure set aws_access_key_id     \$AWS_KEY_ID
+                        aws configure set aws_secret_access_key \$AWS_SECRET
+                        aws configure set region                ${AWS_REGION}
+
+                        # Sync all site files to S3
+                        # --delete  : removes files from S3 that no longer exist locally
+                        # --acl     : makes every file publicly readable
+                        aws s3 sync . s3://${S3_BUCKET} \\
+                            --exclude ".git/*" \\
+                            --exclude "Jenkinsfile" \\
+                            --exclude "sonar-project.properties" \\
+                            --exclude "*.md" \\
+                            --delete \\
+                            --acl public-read
+                    """
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // STAGE 5: Confirm deployment
+        // ─────────────────────────────────────────────────────────────────
+        stage('Verify Deployment') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID',     variable: 'AWS_KEY_ID'),
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET')
+                ]) {
+                    sh """
+                        aws configure set aws_access_key_id     \$AWS_KEY_ID
+                        aws configure set aws_secret_access_key \$AWS_SECRET
+                        aws configure set region                ${AWS_REGION}
+
+                        echo "Files now live in S3:"
+                        aws s3 ls s3://${S3_BUCKET} --recursive --human-readable
+                    """
+                }
+                echo "✅ Website URL: http://${S3_BUCKET}.s3-website-${AWS_REGION}.amazonaws.com"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 Pipeline complete — site is live on S3."
+        }
+        failure {
+            echo "❌ Pipeline failed. Check the stage logs above."
+        }
+    }
+}

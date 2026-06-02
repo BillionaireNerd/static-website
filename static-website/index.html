@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevOps Portfolio | CI/CD Powered</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">⬡ DevOps.io</div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-content">
+      <span class="badge">🚀 Deployed via Jenkins + S3</span>
+      <h1>Build.<br/>Analyze.<br/>Deploy.</h1>
+      <p>This static site is automatically tested with SonarQube and deployed to AWS S3 through a Jenkins CI/CD pipeline.</p>
+      <a href="about.html" class="btn">Explore the Stack →</a>
+    </div>
+    <div class="hero-visual">
+      <div class="pipeline-diagram">
+        <div class="pipe-step">
+          <div class="pipe-icon">⎇</div>
+          <span>Git Push</span>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">⚙</div>
+          <span>Jenkins</span>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">◈</div>
+          <span>SonarQube</span>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step active">
+          <div class="pipe-icon">☁</div>
+          <span>AWS S3</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🔁</div>
+      <h3>Continuous Integration</h3>
+      <p>Every commit triggers an automated Jenkins pipeline — no manual steps required.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡</div>
+      <h3>Static Code Analysis</h3>
+      <p>SonarQube scans every build for bugs, vulnerabilities, and code smells before deployment.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">☁</div>
+      <h3>Cloud Hosting on S3</h3>
+      <p>Files are synced directly to AWS S3 with static website hosting — fast, scalable, cheap.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Built with Jenkins · SonarQube · AWS S3 &nbsp;|&nbsp; <a href="contact.html">Contact</a></p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

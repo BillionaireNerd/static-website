@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About | DevOps Portfolio</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand">⬡ DevOps.io</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="page-header">
+    <h1>The Stack</h1>
+    <p>How this site gets from code to cloud.</p>
+  </section>
+
+  <section class="stack-section">
+    <div class="stack-item">
+      <div class="stack-num">01</div>
+      <div class="stack-body">
+        <h3>Jenkins</h3>
+        <p>Orchestrates the entire CI/CD pipeline. Triggered on every push to the main branch. Runs SonarQube analysis, evaluates the Quality Gate, and executes the S3 deployment.</p>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-num">02</div>
+      <div class="stack-body">
+        <h3>SonarQube</h3>
+        <p>Performs deep static code analysis. Checks for HTML/JS/CSS issues, security vulnerabilities, duplications, and code smells. If the Quality Gate fails, the pipeline aborts — nothing broken ships.</p>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-num">03</div>
+      <div class="stack-body">
+        <h3>AWS S3</h3>
+        <p>Hosts all static files with native static website hosting enabled. Files are synced using <code>aws s3 sync</code> — only changed files are uploaded, keeping deployments fast.</p>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-num">04</div>
+      <div class="stack-body">
+        <h3>IAM + Credentials</h3>
+        <p>A dedicated IAM user with scoped S3 permissions is used. Credentials are stored securely in Jenkins as Secret Text — never hard-coded in the pipeline.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Built with Jenkins · SonarQube · AWS S3 &nbsp;|&nbsp; <a href="contact.html">Contact</a></p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
