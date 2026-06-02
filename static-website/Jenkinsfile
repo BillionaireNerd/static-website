@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        S3_BUCKET  = 'my-static-website-bucket'   // ← change to your bucket name
-        AWS_REGION = 'eu-central-1'                // ← change to your bucket region
+        S3_BUCKET  = 'ci-cd-edifice'   //my static bucket
+        AWS_REGION = 'us-east-1'                //aws regoin
     }
 
     stages {
@@ -16,11 +16,18 @@ pipeline {
         //          To use a Git repo later, replace this stage with:
         //          git url: 'https://github.com/YOU/REPO.git', branch: 'main'
         // ─────────────────────────────────────────────────────────────────
-        stage('Prepare Workspace') {
+        //stage('Prepare Workspace') {
+         //   steps {
+          //      echo 'Using files already present in the Jenkins workspace.'
+           //     sh 'ls -la'
+            //}
+        //}
+
+
+        stage('Fetch Code') {
             steps {
-                echo 'Using files already present in the Jenkins workspace.'
-                sh 'ls -la'
-            }
+                git url: 'https://github.com/BillionaireNerd/static-website.git', branch: 'master'
+             }
         }
 
         // ─────────────────────────────────────────────────────────────────
