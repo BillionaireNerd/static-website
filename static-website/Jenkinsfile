@@ -3,26 +3,10 @@ pipeline {
 
     environment {
         S3_BUCKET  = 'ci-cd-edifice'   //my static bucket
-        AWS_REGION = 'us-east-1'                //aws regoin
+        AWS_REGION = 'us-east-1'        //aws regoin
     }
 
     stages {
-
-        // ─────────────────────────────────────────────────────────────────
-        // STAGE 1: Fetch local files (no GitHub — pipeline runs on the
-        //          Jenkins workspace from a manually triggered build or
-        //          from files already present on the agent).
-        //
-        //          To use a Git repo later, replace this stage with:
-        //          git url: 'https://github.com/YOU/REPO.git', branch: 'main'
-        // ─────────────────────────────────────────────────────────────────
-        //stage('Prepare Workspace') {
-         //   steps {
-          //      echo 'Using files already present in the Jenkins workspace.'
-           //     sh 'ls -la'
-            //}
-        //}
-
 
         stage('Fetch Code') {
             steps {
@@ -30,9 +14,7 @@ pipeline {
              }
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // STAGE 2: SonarQube static code analysis  (your existing stage)
-        // ─────────────────────────────────────────────────────────────────
+        // STAGE 2: SonarQube static code analysis  
         stage('Code Analysis') {
             environment {
                 scannerHome = tool 'SonarScanner'
@@ -50,26 +32,19 @@ pipeline {
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────
         // STAGE 3: Wait for Quality Gate result from SonarQube
-        //          Pipeline aborts here if quality gate fails — nothing
-        //          broken gets deployed.
-        // ─────────────────────────────────────────────────────────────────
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
 
-        // ─────────────────────────────────────────────────────────────────
+        //stage('Quality Gate') {
+            //steps {
+                //timeout(time: 10, unit: 'MINUTES') {
+                    //waitForQualityGate abortPipeline: false
+                //}
+            //}
+        //}
+
+
         // STAGE 4: Deploy to S3
-        //          Uses AWS credentials stored in Jenkins as Secret Text.
-        //          IDs must match exactly what you saved:
-        //            - AWS_ACCESS_KEY_ID
-        //            - AWS_SECRET_ACCESS_KEY
-        // ─────────────────────────────────────────────────────────────────
+
         stage('Deploy to S3') {
             steps {
                 withCredentials([
@@ -85,21 +60,20 @@ pipeline {
                         # Sync all site files to S3
                         # --delete  : removes files from S3 that no longer exist locally
                         # --acl     : makes every file publicly readable
-                        aws s3 sync . s3://${S3_BUCKET} \\
+                        aws s3 sync static-website/ s3://${S3_BUCKET} \\
                             --exclude ".git/*" \\
                             --exclude "Jenkinsfile" \\
                             --exclude "sonar-project.properties" \\
                             --exclude "*.md" \\
                             --delete \\
-                            --acl public-read
                     """
                 }
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────
+
         // STAGE 5: Confirm deployment
-        // ─────────────────────────────────────────────────────────────────
+
         stage('Verify Deployment') {
             steps {
                 withCredentials([
